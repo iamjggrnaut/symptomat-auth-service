@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { ConflictException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Patient } from "./entities/patient.entity";
@@ -70,30 +70,42 @@ export class PatientsService {
     // Doctor: Super Doctor - на него регистрируются все пациенты с самостоятельной регистрацией
     const doctorId = "fa980263-0d17-4b18-88a5-d015d3312ec5";
 
-    const patient = await this.create(createPatientDto);
+    try {
+      // Пытаемся создать пациента
+      const patient = await this.create(createPatientDto);
 
-    const hospitalPatient = this.hospitalPatientRepository.create({
-      patientId: patient.id,
-      hospitalId: hospitalId,
-      medicalCardNumber: createPatientDto.medicalCardNumber,
-      firstName: createPatientDto.firstName,
-      lastName: createPatientDto.lastName
-    });
+      // Создаем связь пациента с госпиталем
+      const hospitalPatient = this.hospitalPatientRepository.create({
+          patientId: patient.id,
+          hospitalId: hospitalId,
+          medicalCardNumber: createPatientDto.medicalCardNumber,
+          firstName: createPatientDto.firstName,
+          lastName: createPatientDto.lastName
+      });
 
-    await this.hospitalPatientRepository.save(hospitalPatient);
+      await this.hospitalPatientRepository.save(hospitalPatient);
 
-    const doctorPatient = this.doctorPatientRepository.create({
-      patientId: patient.id,
-      doctorId: doctorId,
-    });
+      // Создаем связь пациента с доктором
+      const doctorPatient = this.doctorPatientRepository.create({
+          patientId: patient.id,
+          doctorId: doctorId,
+      });
 
-    await this.doctorPatientRepository.save(doctorPatient);
+      await this.doctorPatientRepository.save(doctorPatient);
 
-    const tokens = await this.generateTokens(patient);
-    return {
-      user: { id: patient.id, email: patient.email },
-      ...tokens,
-    };
+      // Генерируем токены
+      const tokens = await this.generateTokens(patient);
+      
+      return {
+          user: { id: patient.id, email: patient.email },
+          ...tokens,
+      };
+  } catch (error) {
+      if (error.code === '23505') { 
+          throw new ConflictException('Пациент с таким email уже существует!');
+      }
+      throw error;
+  }
   }
 
    async login(input: any): Promise<Patient | any> {

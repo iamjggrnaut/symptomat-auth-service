@@ -47,5 +47,6 @@ __decorate([
     __metadata("design:type", Date)
 ], Doctor.prototype, "deletedAt", void 0);
 exports.Doctor = Doctor = __decorate([
-    (0, typeorm_1.Entity)('doctors')
+    (0, typeorm_1.Entity)('doctors'),
+    (0, typeorm_1.Unique)(['email'])
 ], Doctor);

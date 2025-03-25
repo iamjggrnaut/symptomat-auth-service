@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { ConflictException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Doctor } from "./entities/doctor.entity";
@@ -67,24 +67,31 @@ export class DoctorsService {
     // Госпиталь: Глобальное медицинское учреждение
     const hospitalId = "332ea21e-470f-49bd-b9d5-b1df63f8b150";
 
-    const doctor = await this.create({
-      ...createDoctorDto,
-    });
+    try {
+      const doctor = await this.create({
+          ...createDoctorDto,
+      });
 
-    const hospitalDoctor = this.hospitalDoctorRepository.create({
-      doctorId: doctor.id,
-      hospitalId: hospitalId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+      const hospitalDoctor = this.hospitalDoctorRepository.create({
+          doctorId: doctor.id,
+          hospitalId: hospitalId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+      });
 
-    await this.hospitalDoctorRepository.save(hospitalDoctor);
+      await this.hospitalDoctorRepository.save(hospitalDoctor);
 
-    const tokens = await this.generateTokens(doctor);
-    return {
-      user: { id: doctor.id, email: doctor.email },
-      ...tokens,
-    };
+      const tokens = await this.generateTokens(doctor);
+      return {
+          user: { id: doctor.id, email: doctor.email },
+          ...tokens,
+      };
+  } catch (error) {
+      if (error.code === '23505') { 
+          throw new ConflictException('Доктор с таким email уже существует!');
+      }
+      throw error;
+  }
   }
 
   async findByEmail(email: string): Promise<Doctor | undefined> {

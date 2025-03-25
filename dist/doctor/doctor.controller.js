@@ -16,6 +16,7 @@ exports.DoctorsController = void 0;
 const common_1 = require("@nestjs/common");
 const create_doctor_dto_1 = require("./dto/create-doctor.dto");
 const doctor_service_1 = require("./doctor.service");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 let DoctorsController = class DoctorsController {
     constructor(doctorsService) {
         this.doctorsService = doctorsService;
@@ -49,14 +50,16 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DoctorsController.prototype, "loginDoc", null);
 __decorate([
-    (0, common_1.Post)('find-patient'),
+    (0, common_1.Post)("find-patient"),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], DoctorsController.prototype, "getPatientByEmail", null);
 __decorate([
-    (0, common_1.Post)('assign-patient'),
+    (0, common_1.Post)("assign-patient"),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),

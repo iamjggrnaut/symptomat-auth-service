@@ -4,10 +4,12 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  DeleteDateColumn
+  DeleteDateColumn,
+  Unique
 } from "typeorm";
 
 @Entity('doctors')
+@Unique(['email'])
 export class Doctor {
   @PrimaryGeneratedColumn("uuid")
   id: string;
