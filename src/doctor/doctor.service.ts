@@ -67,31 +67,39 @@ export class DoctorsService {
     // Госпиталь: Глобальное медицинское учреждение
     const hospitalId = "332ea21e-470f-49bd-b9d5-b1df63f8b150";
 
+    const existingDoctor = await this.doctorRepository.findOne({
+      where: { email: createDoctorDto.email.toLowerCase() },
+    });
+
+    if (existingDoctor) {
+      throw new ConflictException("Доктор с таким email уже существует!");
+    }
+
     try {
       const doctor = await this.create({
-          ...createDoctorDto,
+        ...createDoctorDto,
       });
 
       const hospitalDoctor = this.hospitalDoctorRepository.create({
-          doctorId: doctor.id,
-          hospitalId: hospitalId,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+        doctorId: doctor.id,
+        hospitalId: hospitalId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
 
       await this.hospitalDoctorRepository.save(hospitalDoctor);
 
       const tokens = await this.generateTokens(doctor);
       return {
-          user: { id: doctor.id, email: doctor.email },
-          ...tokens,
+        user: { id: doctor.id, email: doctor.email },
+        ...tokens,
       };
-  } catch (error) {
-      if (error.code === '23505') { 
-          throw new ConflictException('Доктор с таким email уже существует!');
+    } catch (error) {
+      if (error.code === "23505") {
+        throw new ConflictException("Доктор с таким email уже существует!");
       }
       throw error;
-  }
+    }
   }
 
   async findByEmail(email: string): Promise<Doctor | undefined> {
@@ -102,7 +110,7 @@ export class DoctorsService {
     console.log("email ", input.email);
 
     const doctor = await this.doctorRepository.findOne({
-      where: { email: input.email },
+      where: { email: input.email?.toLowerCase() },
     });
 
     if (!doctor) {
@@ -163,10 +171,7 @@ export class DoctorsService {
     });
 
     if (existingRecord) {
-      await this.doctorPatientRepository.update(
-        { patientId },
-        { doctorId }
-      );
+      await this.doctorPatientRepository.update({ patientId }, { doctorId });
     } else {
       await this.doctorPatientRepository.insert({ patientId, doctorId });
     }

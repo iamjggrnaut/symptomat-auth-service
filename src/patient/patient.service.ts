@@ -30,7 +30,6 @@ export class PatientsService {
   }
 
   async create(createPatientDto: CreatePatientDto): Promise<Patient> {
-
     const hashedPassword = await bcrypt.hash(createPatientDto.password, 10);
     const patient = this.patientRepository.create({
       email: createPatientDto.email.toLowerCase(),
@@ -70,67 +69,71 @@ export class PatientsService {
     // Doctor: Super Doctor - на него регистрируются все пациенты с самостоятельной регистрацией
     const doctorId = "fa980263-0d17-4b18-88a5-d015d3312ec5";
 
+    // Проверяем существование пользователя перед созданием
+    const existingPatient = await this.patientRepository.findOne({
+      where: { email: createPatientDto.email.toLowerCase() },
+    });
+
+    if (existingPatient) {
+      throw new ConflictException("Пациент с таким email уже существует!");
+    }
+
     try {
-      // Пытаемся создать пациента
       const patient = await this.create(createPatientDto);
 
-      // Создаем связь пациента с госпиталем
       const hospitalPatient = this.hospitalPatientRepository.create({
-          patientId: patient.id,
-          hospitalId: hospitalId,
-          medicalCardNumber: createPatientDto.medicalCardNumber,
-          firstName: createPatientDto.firstName,
-          lastName: createPatientDto.lastName
+        patientId: patient.id,
+        hospitalId: hospitalId,
+        medicalCardNumber: createPatientDto.medicalCardNumber,
+        firstName: createPatientDto.firstName,
+        lastName: createPatientDto.lastName,
       });
 
       await this.hospitalPatientRepository.save(hospitalPatient);
 
-      // Создаем связь пациента с доктором
       const doctorPatient = this.doctorPatientRepository.create({
-          patientId: patient.id,
-          doctorId: doctorId,
+        patientId: patient.id,
+        doctorId: doctorId,
       });
 
       await this.doctorPatientRepository.save(doctorPatient);
 
-      // Генерируем токены
       const tokens = await this.generateTokens(patient);
-      
-      return {
-          user: { id: patient.id, email: patient.email },
-          ...tokens,
-      };
-  } catch (error) {
-      if (error.code === '23505') { 
-          throw new ConflictException('Пациент с таким email уже существует!');
-      }
-      throw error;
-  }
-  }
 
-   async login(input: any): Promise<Patient | any> {
-      console.log("email ", input.email);
-  
-      const patient = await this.patientRepository.findOne({
-        where: { email: input.email },
-      });
-  
-      if (!patient) {
-        throw new Error("Пользователь с таким email не найден");
-      }
-
-      const passMatch = bcrypt.compareSync(input.password, patient.password);
-
-      if (!passMatch) {
-        throw new Error("Неверный пароль");
-      }
-  
-      const tokens = await this.generateTokens(patient);
-  
       return {
         user: { id: patient.id, email: patient.email },
         ...tokens,
       };
+    } catch (error) {
+      if (error.code === "23505") {
+        throw new ConflictException("Пациент с таким email уже существует!");
+      }
+      throw error;
+    }
+  }
+
+  async login(input: any): Promise<Patient | any> {
+    console.log("email ", input.email);
+
+    const patient = await this.patientRepository.findOne({
+      where: { email: input.email?.toLowerCase() },
+    });
+
+    if (!patient) {
+      throw new Error("Пользователь с таким email не найден");
     }
 
+    const passMatch = bcrypt.compareSync(input.password, patient.password);
+
+    if (!passMatch) {
+      throw new Error("Неверный пароль");
+    }
+
+    const tokens = await this.generateTokens(patient);
+
+    return {
+      user: { id: patient.id, email: patient.email },
+      ...tokens,
+    };
+  }
 }
