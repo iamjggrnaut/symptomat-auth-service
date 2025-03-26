@@ -18,13 +18,13 @@ export class DoctorsController {
   }
 
   @Post("find-patient")
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async getPatientByEmail(@Body() email: string) {
     return this.doctorsService.getPatientByEmail(email);
   }
 
   @Post("assign-patient")
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async assignPatientToDoctor(@Body() input: object) {
     return this.doctorsService.assignPatientToDoctor(input);
   }
