@@ -33,6 +33,7 @@ export class DoctorsService {
       password: hashedPassword,
       email: createDoctorDto.email.toLowerCase(),
       role: "doctor",
+      tgChatId: createDoctorDto.tgChatId,
       notificationsSettings: JSON.stringify({
         contactMeRequest: false,
         criticalIdicators: false,
@@ -91,7 +92,7 @@ export class DoctorsService {
 
       const tokens = await this.generateTokens(doctor);
       return {
-        user: { id: doctor.id, email: doctor.email },
+        user: { id: doctor.id, email: doctor.email, tgChatId: doctor.tgChatId },
         ...tokens,
       };
     } catch (error) {
@@ -126,7 +127,7 @@ export class DoctorsService {
     const tokens = await this.generateTokens(doctor);
 
     return {
-      user: { id: doctor.id, email: doctor.email },
+      user: { id: doctor.id, email: doctor.email, tgChatId: doctor.tgChatId },
       ...tokens,
     };
   }

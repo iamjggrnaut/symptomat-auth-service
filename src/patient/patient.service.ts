@@ -36,6 +36,7 @@ export class PatientsService {
       fcmToken: null,
       isFirstSignUp: false,
       lastAuthProvider: "email",
+      tgChatId: createPatientDto.tgChatId,
       notificationsSettings: JSON.stringify({ newSurvey: false }),
       language: "ru",
       password: hashedPassword,
@@ -101,7 +102,7 @@ export class PatientsService {
       const tokens = await this.generateTokens(patient);
 
       return {
-        user: { id: patient.id, email: patient.email },
+        user: { id: patient.id, email: patient.email, tgChatId: patient.tgChatId },
         ...tokens,
       };
     } catch (error) {
@@ -132,7 +133,7 @@ export class PatientsService {
     const tokens = await this.generateTokens(patient);
 
     return {
-      user: { id: patient.id, email: patient.email },
+      user: { id: patient.id, email: patient.email, tgChatId: patient.tgChatId },
       ...tokens,
     };
   }
