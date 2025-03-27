@@ -9,7 +9,11 @@
     "start:dev": "nest start --watch",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:cov": "jest --coverage"
+    "test:cov": "jest --coverage",
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
+    "typeorm:create-migration": "npm run typeorm migration:create -- -n",
+    "typeorm:run-migrations": "npm run typeorm migration:run",
+    "typeorm:revert-migration": "npm run typeorm migration:revert"
   },
   "keywords": [],
   "author": "",
