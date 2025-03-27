@@ -30,6 +30,9 @@ export class Patient {
   @Column({ nullable: true })
   role: string;
 
+  @Column({ nullable: true })
+  tgChatId?: number;
+
   @Column()
   createdAt: Date;
 

@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString } from "class-validator";
+import { IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreatePatientDto {
   @IsEmail()
@@ -16,4 +16,8 @@ export class CreatePatientDto {
 
   @IsString()
   lastName?: string;
+
+  @IsOptional()
+  @IsNumber()
+  tgChatId?: number;
 }
