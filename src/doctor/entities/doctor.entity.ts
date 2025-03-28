@@ -26,7 +26,7 @@ export class Doctor {
   @Column({ default: "doctor" })
   role: string;
 
-  @Column({ nullable: true })
+  @Column({type: 'bigint', nullable: true })
   tgChatId?: number;
 
   @CreateDateColumn()

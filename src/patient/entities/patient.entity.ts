@@ -30,7 +30,7 @@ export class Patient {
   @Column({ nullable: true })
   role: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'bigint', nullable: true })
   tgChatId?: number;
 
   @Column()
